@@ -1,7 +1,10 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import useSWR from 'swr';
+import Image from 'next/image'
+import mondaySdk from "monday-sdk-js";
+import { relative } from 'path';
 
 interface ModelType {
   object: 'engine';
@@ -14,10 +17,12 @@ interface ModelType {
 
 const Form = () => {
   const messageInput = useRef<HTMLTextAreaElement | null>(null);
-  const [response, setResponse] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [models, setModels] = useState<any[]>([]);
   const [currentModel, setCurrentModel] = useState('text-davinci-003');
+  const [mondayContext, setMondayContext] = useState({});
+
+  const monday = mondaySdk();
 
   const handleEnter = (
     e: React.KeyboardEvent<HTMLTextAreaElement> &
@@ -34,8 +39,7 @@ const Form = () => {
     e.preventDefault();
     const message = messageInput.current?.value;
     if (message !== undefined) {
-      const initialResponse: string[] = [...response, message];
-      setResponse(initialResponse);
+      setIsLoading(true);
       messageInput.current!.value = '';
     }
 
@@ -47,21 +51,38 @@ const Form = () => {
       message,
       currentModel,
     });
-    const totalResponse: string[] = [...response, message, data.bot];
-    setResponse(totalResponse);
-    localStorage.setItem('response', JSON.stringify(totalResponse));
+    insertBotTextAndClose(data.bot);
     setIsLoading(false);
   };
 
-  useSWR('fetchingResponse', async () => {
-    const storedResponse = localStorage.getItem('response');
-    if (storedResponse) {
-      setResponse(JSON.parse(storedResponse));
+  const insertBotTextAndClose = (text: string) => {
+    console.log('mondayContext', mondayContext);
+    const { focusedBlocks } = mondayContext.data;
+    const blockId = focusedBlocks[0].id;
+    console.log(text, blockId);
+    monday.execute('updateDocBlock', {
+      id: blockId,
+      content: { deltaFormat: [{ insert: text }] },
+    });
+
+    // monday.execute('addDocBlock', {
+    //   type: 'normal_text',
+    //   content: { deltaFormat: [{ insert: text }] },
+    //   after_block_id: blockId
+    // });
+
+    monday.execute("closeDocModal");
+  };
+
+  useEffect(() => {
+    async function setMondayCtx() {
+      const ctx = await monday.get('context');
+      setMondayContext(ctx);
     }
-  });
+    setMondayCtx();
+  }, []);
 
   const fetcher = async () => {
-    // const models = setModels((await (await fetch('/api/models')).json()).data);
     const models = await (await fetch('/api/models')).json();
     setModels(models.data);
     const modelIndex = models.data.findIndex(
@@ -73,82 +94,22 @@ const Form = () => {
 
   useSWR('fetchingModels', fetcher);
 
-  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCurrentModel(e.target.value);
-  };
-
   return (
-    <div className='flex justify-center'>
-      {/* <select
-        value={currentModel}
-        onChange={handleModelChange}
-        className='w-72 fixed top-5 left-5 outline-none border-none p-4 rounded-md bg-white text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900'
-      >
-        {models.map((model) => (
-          <option key={model.id} value={model.id}>
-            {model.id}
-          </option>
-        ))}
-      </select> */}
-      {/* <div className='mx-2 flex flex-col items-start gap-3 pt-6 last:mb-6 md:mx-auto md:max-w-3xl'>
-        {isLoading
-          ? response.map((item: any, index: number) => {
-              return (
-                <div
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
-                  } p-3 rounded-lg`}
-                >
-                  <p>{item}</p>
-                </div>
-              );
-            })
-          : response
-          ? response.map((item: string, index: number) => {
-              return (
-                <div
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? 'bg-blue-500' : 'bg-gray-500'
-                  } p-3 rounded-lg`}
-                >
-                  <p>{item}</p>
-                </div>
-              );
-            })
-          : null}
-      </div> */}
-      <form
+    <div className='flex justify-center bg-gray-700' style={{ position: 'relative', zIndex: 10000 }}>
+      {isLoading ? (<Image src="/Spinner-1s-200px.svg" alt="loader" height={150} width={150} />) :
+      (<form
         onSubmit={handleSubmit}
-        className='w-full fixed bottom-0 md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
+        className='w-full fixed bottom-0 bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)]'
+        style={{ height: '150px' }}
       >
         <textarea
           name='Message'
-          placeholder='Type your query'
+          placeholder='Type your prompt here (and hit enter)'
           ref={messageInput}
           onKeyDown={handleEnter}
-          className='w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1'
+          className='w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1 max-h-screen'
         />
-        <button
-          disabled={isLoading}
-          type='submit'
-          className='absolute top-[1.4rem] right-5 p-1 rounded-md text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent'
-        >
-          <svg
-            stroke='currentColor'
-            fill='currentColor'
-            strokeWidth='0'
-            viewBox='0 0 20 20'
-            className='h-4 w-4 rotate-90'
-            height='1em'
-            width='1em'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path d='M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z'></path>
-          </svg>
-        </button>
-      </form>
+      </form>)}
     </div>
   );
 };
