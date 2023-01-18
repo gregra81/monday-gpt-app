@@ -53,11 +53,6 @@ const Form = () => {
     setIsLoading(false);
   };
 
-  const handleReset = () => {
-    localStorage.removeItem('response');
-    setResponse([]);
-  };
-
   useSWR('fetchingResponse', async () => {
     const storedResponse = localStorage.getItem('response');
     if (storedResponse) {
@@ -69,7 +64,6 @@ const Form = () => {
     // const models = setModels((await (await fetch('/api/models')).json()).data);
     const models = await (await fetch('/api/models')).json();
     setModels(models.data);
-    // setCurrentModel(models.data[6].id);
     const modelIndex = models.data.findIndex(
       (model: ModelType) => model.id === 'text-davinci-003'
     );
@@ -85,7 +79,7 @@ const Form = () => {
 
   return (
     <div className='flex justify-center'>
-      <select
+      {/* <select
         value={currentModel}
         onChange={handleModelChange}
         className='w-72 fixed top-5 left-5 outline-none border-none p-4 rounded-md bg-white text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900'
@@ -95,16 +89,8 @@ const Form = () => {
             {model.id}
           </option>
         ))}
-      </select>
-
-      <button
-        onClick={handleReset}
-        type='reset'
-        className='fixed top-5 right-5 p-4 rounded-md bg-white text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-900 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent'
-      >
-        Clear History
-      </button>
-      <div className='w-full mx-2 flex flex-col items-start gap-3 pt-6 last:mb-6 md:mx-auto md:max-w-3xl'>
+      </select> */}
+      {/* <div className='mx-2 flex flex-col items-start gap-3 pt-6 last:mb-6 md:mx-auto md:max-w-3xl'>
         {isLoading
           ? response.map((item: any, index: number) => {
               return (
@@ -132,10 +118,10 @@ const Form = () => {
               );
             })
           : null}
-      </div>
+      </div> */}
       <form
         onSubmit={handleSubmit}
-        className='fixed bottom-0 w-full md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
+        className='w-full fixed bottom-0 md:max-w-3xl bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] mb-4'
       >
         <textarea
           name='Message'
