@@ -55,16 +55,19 @@ const Form = () => {
   };
 
   const insertBotTextAndClose = (text: string) => {
+    // @ts-ignore
     const { focusedBlocks } = mondayContext.data;
     const blockId = focusedBlocks[0].id;
 
+    // @ts-ignore
     monday.execute('addDocBlock', {
       type: 1,
       content: { deltaFormat: [{ insert: text }] },
       after_block_id: blockId
     });
 
-    monday.execute("closeDocModal");
+    // @ts-ignore
+    monday.execute('closeDocModal');
   };
 
   useEffect(() => {
