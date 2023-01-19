@@ -4,7 +4,6 @@ import axios from 'axios';
 import useSWR from 'swr';
 import Image from 'next/image'
 import mondaySdk from "monday-sdk-js";
-import { relative } from 'path';
 
 interface ModelType {
   object: 'engine';
@@ -56,20 +55,14 @@ const Form = () => {
   };
 
   const insertBotTextAndClose = (text: string) => {
-    console.log('mondayContext', mondayContext);
     const { focusedBlocks } = mondayContext.data;
     const blockId = focusedBlocks[0].id;
-    console.log(text, blockId);
-    monday.execute('updateDocBlock', {
-      id: blockId,
-      content: { deltaFormat: [{ insert: text }] },
-    });
 
-    // monday.execute('addDocBlock', {
-    //   type: 'normal_text',
-    //   content: { deltaFormat: [{ insert: text }] },
-    //   after_block_id: blockId
-    // });
+    monday.execute('addDocBlock', {
+      type: 1,
+      content: { deltaFormat: [{ insert: text }] },
+      after_block_id: blockId
+    });
 
     monday.execute("closeDocModal");
   };
