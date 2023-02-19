@@ -41,28 +41,22 @@ const Form = () => {
       setIsLoading(true);
       messageInput.current!.value = '';
     }
-    console.log('works 1');
     if (!message) {
       return;
     }
-    console.log('works 2');
     try {
       const { data } = await axios.post('/api/response', {
         message,
         currentModel,
       });
       insertBotTextAndClose(data.bot);
-      console.log('works 3');
     } catch (e: any) {
       console.error('Could not complete action, error was', e);
-      console.log('works 4');
     } finally {
       // @ts-ignore
       monday.execute('closeDocModal');
       setIsLoading(false);
-      console.log('works 5');
     }
-    
   };
 
   const insertBotTextAndClose = (text: string) => {
