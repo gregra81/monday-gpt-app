@@ -1,9 +1,9 @@
-import Form from '../components/Form';
+import Prompt from '../components/Prompt';
 
 export default function Home() {
   return (
     <main>
-      <Form />
+      <Prompt />
     </main>
   );
 }

@@ -14,7 +14,7 @@ interface ModelType {
   created: string;
 }
 
-const Form = () => {
+const Prompt = () => {
   const messageInput = useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [models, setModels] = useState<any[]>([]);
@@ -93,23 +93,18 @@ const Form = () => {
   useSWR('fetchingModels', fetcher);
 
   return (
-    <div className='flex justify-center bg-gray-700' style={{ position: 'relative', zIndex: 10000 }}>
-      {isLoading ? (<Image src="/Spinner-1s-200px.svg" alt="loader" height={150} width={150} />) :
-      (<form
-        onSubmit={handleSubmit}
-        className='w-full fixed bottom-0 bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)]'
-        style={{ height: '150px' }}
-      >
+    <div>
+      {isLoading ? (<div className="loader-wrapper"><span className="loader"></span></div>) :
+      (<form onSubmit={handleSubmit}>
         <textarea
           name='Message'
           placeholder='Type your prompt here (and hit enter)'
           ref={messageInput}
           onKeyDown={handleEnter}
-          className='w-full resize-none bg-transparent outline-none pt-4 pl-4 translate-y-1 max-h-screen'
         />
       </form>)}
     </div>
   );
 };
 
-export default Form;
+export default Prompt;
