@@ -78,7 +78,7 @@ const Prompt = () => {
       setMondayContext(ctx);
     }
     setMondayCtx();
-  }, []);
+  }, [monday]);
 
   const fetcher = async () => {
     const models = await (await fetch('/api/models')).json();
