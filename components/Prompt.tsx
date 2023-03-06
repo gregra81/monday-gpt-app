@@ -2,8 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import useSWR from 'swr';
-import Image from 'next/image'
-import mondaySdk from "monday-sdk-js";
+import mondaySdk from 'monday-sdk-js';
 
 interface ModelType {
   object: 'engine';
@@ -53,7 +52,6 @@ const Prompt = () => {
     } catch (e: any) {
       console.error('Could not complete action, error was', e);
     } finally {
-      // @ts-ignore
       monday.execute('closeDocModal');
       setIsLoading(false);
     }
@@ -64,11 +62,10 @@ const Prompt = () => {
     const { focusedBlocks } = mondayContext.data;
     const blockId = focusedBlocks[0].id;
 
-    // @ts-ignore
     monday.execute('addDocBlock', {
       type: 'normal text',
       content: { deltaFormat: [{ insert: text }] },
-      after_block_id: blockId
+      afterBlockId: blockId
     });
   };
 
