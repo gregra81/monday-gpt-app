@@ -1,5 +1,5 @@
 {
-    "name": "nextjs",
+    "name": "chat-gpt-nextjs",
     "options": {
       "allow-unauthenticated": true,
       "memory": "256Mi",

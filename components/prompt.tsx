@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import useSWR from 'swr';
 import mondaySdk from 'monday-sdk-js';
+import css from './prompt.module.css'
 
 interface ModelType {
   object: 'engine';
@@ -26,7 +27,7 @@ const Prompt = () => {
     e: React.KeyboardEvent<HTMLTextAreaElement> &
       React.FormEvent<HTMLFormElement>
   ) => {
-    if (e.key === 'Enter' && isLoading === false) {
+    if (e.key === 'Enter' && !isLoading) {
       e.preventDefault();
       setIsLoading(true);
       handleSubmit(e);
@@ -44,7 +45,7 @@ const Prompt = () => {
       return;
     }
     try {
-      const { data } = await axios.post('/api/response', {
+      const { data } = await axios.post('/api/ai/response', {
         message,
         currentModel,
       });
@@ -78,7 +79,7 @@ const Prompt = () => {
   }, [monday]);
 
   const fetcher = async () => {
-    const models = await (await fetch('/api/models')).json();
+    const models = await (await fetch('/api/ai/models')).json();
     setModels(models.data);
     const modelIndex = models.data.findIndex(
       (model: ModelType) => model.id === 'text-davinci-003'
@@ -91,13 +92,14 @@ const Prompt = () => {
 
   return (
     <div>
-      {isLoading ? (<div className="loader-wrapper"><span className="loader"></span></div>) :
+      {isLoading ? (<div className={css.loaderWrapper}><span className={css.loader}></span></div>) :
       (<form onSubmit={handleSubmit}>
         <textarea
-          name='Message'
-          placeholder='Type your prompt here (and hit enter)'
-          ref={messageInput}
-          onKeyDown={handleEnter}
+            className={css.textarea}
+            name='Message'
+            placeholder='Type your prompt here (and hit enter)'
+            ref={messageInput}
+            onKeyDown={handleEnter}
         />
       </form>)}
     </div>
