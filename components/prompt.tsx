@@ -1,32 +1,17 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
-import useSWR from 'swr';
 import mondaySdk from 'monday-sdk-js';
-import css from './prompt.module.css'
-
-interface ModelType {
-  object: 'engine';
-  id: string;
-  ready: boolean;
-  owner: string;
-  permissions: null;
-  created: string;
-}
+import css from './prompt.module.css';
 
 const Prompt = () => {
   const messageInput = useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [models, setModels] = useState<any[]>([]);
-  const [currentModel, setCurrentModel] = useState('text-davinci-003');
   const [mondayContext, setMondayContext] = useState({});
 
   const monday = mondaySdk();
 
-  const handleEnter = (
-    e: React.KeyboardEvent<HTMLTextAreaElement> &
-      React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleEnter = (e: React.KeyboardEvent<HTMLTextAreaElement> & React.FormEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && !isLoading) {
       e.preventDefault();
       setIsLoading(true);
@@ -45,9 +30,8 @@ const Prompt = () => {
       return;
     }
     try {
-      const { data } = await axios.post('/api/ai/response', {
+      const { data } = await axios.post('/api/server/ai-response', {
         message,
-        currentModel,
       });
       insertBotTextAndClose(data.bot);
     } catch (e: any) {
@@ -66,7 +50,7 @@ const Prompt = () => {
     monday.execute('addDocBlock', {
       type: 'normal text',
       content: { deltaFormat: [{ insert: text }] },
-      afterBlockId: blockId
+      afterBlockId: blockId,
     });
   };
 
@@ -78,30 +62,23 @@ const Prompt = () => {
     setMondayCtx();
   }, [monday]);
 
-  const fetcher = async () => {
-    const models = await (await fetch('/api/ai/models')).json();
-    setModels(models.data);
-    const modelIndex = models.data.findIndex(
-      (model: ModelType) => model.id === 'text-davinci-003'
-    );
-    setCurrentModel(models.data[modelIndex].id);
-    return models;
-  };
-
-  useSWR('fetchingModels', fetcher);
-
   return (
     <div>
-      {isLoading ? (<div className={css.loaderWrapper}><span className={css.loader}></span></div>) :
-      (<form onSubmit={handleSubmit}>
-        <textarea
+      {isLoading ? (
+        <div className={css.loaderWrapper}>
+          <span className={css.loader}></span>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <textarea
             className={css.textarea}
-            name='Message'
-            placeholder='Type your prompt here (and hit enter)'
+            name="Message"
+            placeholder="Type your prompt here (and hit enter)"
             ref={messageInput}
             onKeyDown={handleEnter}
-        />
-      </form>)}
+          />
+        </form>
+      )}
     </div>
   );
 };
