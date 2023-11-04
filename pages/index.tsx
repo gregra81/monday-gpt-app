@@ -9,10 +9,7 @@ export default function IndexPage() {
           <Link href="/doc-slash-command">Doc Slash Command</Link>
         </li>
         <li>
-          <Link href="/board-view">Board View</Link>
-        </li>
-        <li>
-          <Link href="/custom-object">Custom Object</Link>
+          <Link href="/object-view">Custom Object</Link>
         </li>
       </ul>
     </div>

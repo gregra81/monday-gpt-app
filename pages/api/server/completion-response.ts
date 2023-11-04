@@ -8,9 +8,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { message } = req.body;
+    const { message, model } = req.body;
     const response = await openai.createCompletion({
       ...defaultOpenAIConfiguration,
+      model: model ?? defaultOpenAIConfiguration.model,
       prompt: `${message}`,
     });
 
