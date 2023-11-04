@@ -18,20 +18,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { itemId, updateId } = req?.body?.payload?.inputFields;
 
     if (!itemId || !updateId) {
-      logger.error('Missing integration input(s) itemId, updateId');
-      return res.status(400).json({ error: 'Integration input(s) are missing' });
+      const msg = 'Missing integration input(s) itemId, updateId';
+      logger.error(msg);
+      return res.status(400).json({ error: msg });
     }
     const mondayClient = initMondayClient({ token: shortLivedToken, apiVersion: '2023-10' });
 
+    // answer only for the first update
     const itemUpdates = await mondayClient.api(
+        `query { items(ids: [${itemId}]) { updates { id } } }`,
+        );
+    const firstUpdateId = itemUpdates.data.items[0].updates.pop().id;
+    if (Number(firstUpdateId) !== updateId) {
+      const msg = `Not answering for update ${updateId} in item ${itemId} because it's not the first update`;
+      logger.info(msg);
+      return res.status(200).json({ message: msg });
+    }
+
+    const itemUpdateById = await mondayClient.api(
       `query { items(ids: [${itemId}]) { updates(ids: [${updateId}]) { body } } }`,
     );
 
-    const respBody = itemUpdates.data.items[0].updates[0].body;
+    const respBody = itemUpdateById.data.items[0].updates[0].body;
 
     if (!respBody) {
-      logger.warn(`No updates from monday API for item ${itemId}`);
-      return res.status(400).json({ error: `No updates from monday API for item ${itemId}` });
+      const msg = `No updates from monday API for item ${itemId}`;
+      logger.error(msg);
+      return res.status(400).json({ error: msg });
     }
 
     const response = await getOpenAiResponse(respBody);
