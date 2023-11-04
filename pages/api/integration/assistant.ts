@@ -37,10 +37,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const response = await getOpenAiResponse(respBody);
 
     if (response.data.choices[0].text) {
-      const item = await respondToItem(shortLivedToken, itemId, response.data.choices[0].text);
+      await respondToItem(shortLivedToken, itemId, response.data.choices[0].text);
       return res.status(200).json({ message: 'Success' });
     } else {
-      logger.info(`No response from OpenAI for item ${itemId}`);
+      logger.error(`No response from OpenAI for update ${updateId} in item ${itemId}`);
       return res.status(200).json({ error: 'No response from OpenAI.' });
     }
   } catch (error: any) {
