@@ -1,5 +1,5 @@
 'use client';
-import Prompt from '../../components/prompt';
+import Prompt from '../../components/Prompt';
 
 export default function Home() {
   return (

@@ -30,7 +30,7 @@ const Prompt = () => {
       return;
     }
     try {
-      const { data } = await axios.post('/api/server/ai-response', {
+      const { data } = await axios.post('/api/server/completion-response', {
         message,
       });
       insertBotTextAndClose(data.bot);

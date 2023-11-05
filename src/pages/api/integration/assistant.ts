@@ -25,9 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const mondayClient = initMondayClient({ token: shortLivedToken, apiVersion: '2023-10' });
 
     // answer only for the first update
-    const itemUpdates = await mondayClient.api(
-        `query { items(ids: [${itemId}]) { updates { id } } }`,
-        );
+    const itemUpdates = await mondayClient.api(`query { items(ids: [${itemId}]) { updates { id } } }`);
     const firstUpdateId = itemUpdates.data.items[0].updates.pop().id;
     if (Number(firstUpdateId) !== updateId) {
       const msg = `Not answering for update ${updateId} in item ${itemId} because it's not the first update`;
