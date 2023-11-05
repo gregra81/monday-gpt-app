@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@mondaycom/apps-sdk": "^0.1.4",
-    "jose": "^4.15.4",
     "jsonwebtoken": "^9.0.2",
     "monday-sdk-js": "^0.4.11",
     "next": "^13.5.5",
