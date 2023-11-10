@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Http401Error, Http500Error } from './errors';
 
 export const mondayWorkflowAuthentication = (req: NextApiRequest, res: NextApiResponse) => {
@@ -7,10 +7,12 @@ export const mondayWorkflowAuthentication = (req: NextApiRequest, res: NextApiRe
   if (!signingSecret) {
     throw new Http500Error('Unable to authenticate request');
   }
-  const authorization = req.headers.authorization ?? req.query?.token;
+  const authorization = req.headers.authorization ?? req.query?.token as string;
   if (!authorization) {
     throw new Http401Error('not authenticated, no credentials in request');
   }
+
+  // @ts-ignore
   const { accountId, userId, backToUrl, shortLivedToken } = jwt.verify(authorization, signingSecret);
   if (!accountId || !userId || !shortLivedToken) {
     throw new Http401Error('authentication error, could not verify credentials');
@@ -29,10 +31,12 @@ export const mondayViewAuthentication = (req: NextApiRequest, res: NextApiRespon
   if (!appSecret) {
     throw new Http500Error('Unable to authenticate request');
   }
-  const authorization = req.headers.authorization ?? req.query?.token;
+  const authorization = req.headers.authorization ?? req.query?.token as string;
   if (!authorization) {
     throw new Http401Error('not authenticated, no credentials in request');
   }
+
+  // @ts-ignore
   const { exp, dat } = jwt.verify(authorization, appSecret);
   if (checkIfExpired(exp)) {
     throw new Http401Error('authentication error, expired token');
