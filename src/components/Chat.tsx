@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { FiSend } from 'react-icons/fi';
 import { BsChevronDown, BsPlusLg } from 'react-icons/bs';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import Message from './Message';
-import { DEFAULT_OPENAI_MODEL } from '../shared/Constants';
 import useAutoResizeTextArea from '../hooks/useAutoResizeTextArea';
+import { context } from '../helpers/context';
+import { storage } from '../helpers/storage/client';
+import { DEFAULT_OPENAI_MODEL } from '../constants/openai';
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
@@ -14,8 +16,11 @@ const Chat = (props: any) => {
   const [showEmptyChat, setShowEmptyChat] = useState(true);
   const [conversation, setConversation] = useState<any[]>([]);
   const [message, setMessage] = useState('');
+  const [firstMessageSent, setFirstMessageSent] = useState(false);
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
+
+  const data = useContext(context);
 
   const selectedModel = DEFAULT_OPENAI_MODEL;
 
@@ -77,6 +82,12 @@ const Chat = (props: any) => {
         console.error(response);
         setErrorMessage(response.statusText);
       }
+
+      if (!firstMessageSent) {
+        // now store the first conversation in monday storage
+        await storage().addItemToArray('prompts', message);
+      }
+      setFirstMessageSent(true);
 
       setIsLoading(false);
     } catch (error: any) {
