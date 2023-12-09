@@ -11,7 +11,7 @@
     "format:fix": "prettier --write ."
   },
   "dependencies": {
-    "@mondaycom/apps-sdk": "^0.1.4",
+    "@mondaycom/apps-sdk": "^2.0.0",
     "autoprefixer": "^10.4.16",
     "axios": "^1.6.1",
     "jsonwebtoken": "^9.0.2",
