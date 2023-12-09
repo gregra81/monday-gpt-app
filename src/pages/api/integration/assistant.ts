@@ -2,8 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import initMondayClient from 'monday-sdk-js';
 import { Logger } from '@mondaycom/apps-sdk';
 
-import { defaultOpenAIConfiguration, openai } from '../../../helpers/openai';
+import { openai } from '../../../helpers/openai';
 import { mondayWorkflowAuthentication } from '../../../helpers/auth';
+import { defaultOpenAICompletionConfiguration } from '../../../constants/openai';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -62,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const getOpenAiResponse = async (message: string) => {
   return await openai.createCompletion({
-    ...defaultOpenAIConfiguration,
+    ...defaultOpenAICompletionConfiguration,
     prompt: `${message}`,
   });
 };

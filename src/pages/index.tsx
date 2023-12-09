@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { context } from '../helpers/context';
+import { PromptsContext } from '../helpers/context';
 
 import Chat from '../components/Chat';
 import Sidebar from '../components/Sidebar';
@@ -13,24 +13,23 @@ import { mondayViewAuthentication } from '../helpers/auth';
 
 export default function Home({ data }) {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
+  const [prompts, setPrompts] = useState(data ?? []);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
   };
 
-  const { Provider } = context;
-
   return (
     <main className="overflow-hidden w-full h-screen relative flex">
       {isComponentVisible ? <MobileSidebar toggleComponentVisibility={toggleComponentVisibility} /> : null}
-      <Provider value={data}>
+      <PromptsContext.Provider value={{ prompts, setPrompts }}>
         <div className="dark hidden flex-shrink-0 bg-gray-900 md:flex md:w-[260px] md:flex-col">
           <div className="flex h-full min-h-0 flex-col ">
             <Sidebar />
           </div>
         </div>
         <Chat toggleComponentVisibility={toggleComponentVisibility} />
-      </Provider>
+      </PromptsContext.Provider>
     </main>
   );
 }

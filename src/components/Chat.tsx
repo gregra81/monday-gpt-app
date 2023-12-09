@@ -4,7 +4,7 @@ import { BsChevronDown, BsPlusLg } from 'react-icons/bs';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import Message from './Message';
 import useAutoResizeTextArea from '../hooks/useAutoResizeTextArea';
-import { context } from '../helpers/context';
+import { PromptsContext } from '../helpers/context';
 import { storage } from '../helpers/storage/client';
 import { DEFAULT_OPENAI_MODEL } from '../constants/openai';
 
@@ -20,7 +20,7 @@ const Chat = (props: any) => {
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
-  const data = useContext(context);
+  const { prompts, setPrompts } = useContext(PromptsContext);
 
   const selectedModel = DEFAULT_OPENAI_MODEL;
 
@@ -86,6 +86,7 @@ const Chat = (props: any) => {
       if (!firstMessageSent) {
         // now store the first conversation in monday storage
         await storage().addItemToArray('prompts', message);
+        setPrompts([...prompts, message]);
       }
       setFirstMessageSent(true);
 
