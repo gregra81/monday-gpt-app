@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { MONDAY_OAUTH_TOKEN_URL } from '../../../constants/monday';
 import jwt from 'jsonwebtoken';
-import { setToken } from '../../../helpers/token-storage';
+import { getMondayTokenKey, setToken } from '../../../helpers/token-storage';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const authPayload = {
@@ -16,11 +16,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const data = response.data;
 
   // store token in secret storage and redirect to app
-  const decodedData = jwt.decode(data.access_token);
+  const decodedData = jwt.decode(data.access_token) as { actid: string; uid: string };
 
-  // @ts-ignore
-  const tokenKey = `monday_token_${decodedData.actid}_${decodedData.uid}`;
+  if (!decodedData) {
+    res.status(400).json({ error: 'Invalid token' });
+    return;
+  }
+  const tokenKey = getMondayTokenKey(Number(decodedData.actid), Number(decodedData.uid));
   await setToken(tokenKey, data.access_token);
-  res.setHeader('set-cookie', `monday_token=${tokenKey}; path=/; samesite=lax; httponly;`);
   res.redirect('/');
 }

@@ -9,6 +9,7 @@ import * as querystring from 'querystring';
 import { MONDAY_OAUTH_AUTH_URL } from '../constants/monday';
 import { getMondayToken } from '../helpers/token-storage';
 import { storage } from '../helpers/storage/server';
+import { mondayViewAuthentication } from '../helpers/auth';
 
 export default function Home({ data }) {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
@@ -35,7 +36,8 @@ export default function Home({ data }) {
 }
 
 export const getServerSideProps = (async (context) => {
-  const mondayToken = await getMondayToken(context.req.cookies);
+  const { accountId, userId } = mondayViewAuthentication(context.query);
+  const mondayToken = await getMondayToken(accountId, userId);
 
   if (!mondayToken) {
     return mondayAuthorize();
