@@ -19,9 +19,9 @@ export class StorageUtil {
   async addItemToArray(key: string, value: string) {
     const data = await this.getItem(key);
     let valueArray: string[] = [];
-    if (data?.value) {
+    if (data) {
       try {
-        valueArray = JSON.parse(data.value);
+        valueArray = JSON.parse(data);
       } catch (e) {
         console.warn('Failed to parse value from storage', e);
       } finally {
@@ -53,7 +53,7 @@ export class StorageUtil {
     if (resp?.error) {
       throw new Error(resp.error);
     }
-    return resp?.data ?? resp?.value ?? null;
+    return resp?.data?.value ?? resp?.value ?? null;
   }
 
   async removeItem(key: string) {
