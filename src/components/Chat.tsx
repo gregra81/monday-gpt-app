@@ -1,12 +1,15 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FiSend } from 'react-icons/fi';
-import { BsChevronDown, BsPlusLg } from 'react-icons/bs';
+import { BsPlusLg } from 'react-icons/bs';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import Message from './Message';
 import useAutoResizeTextArea from '../hooks/useAutoResizeTextArea';
-import { PromptsContext } from '../helpers/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected } from '../state/context';
 import { storage } from '../helpers/storage/client';
 import { DEFAULT_OPENAI_MODEL } from '../constants/openai';
+import { getCurrentDate } from '../helpers/date';
+import { Prompt } from '../types/chat';
+import { generateUUID } from '../helpers/string';
 
 const Chat = (props: any) => {
   const { toggleComponentVisibility } = props;
@@ -14,13 +17,13 @@ const Chat = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showEmptyChat, setShowEmptyChat] = useState(true);
-  const [conversation, setConversation] = useState<any[]>([]);
   const [message, setMessage] = useState('');
-  const [firstMessageSent, setFirstMessageSent] = useState(false);
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const { prompts, setPrompts } = useContext(PromptsContext);
+  const { conversation, setConversation } = useContext(ConversationContext);
+  const { selectedPrompt, setSelectedPrompt } = useContext(PromptsContextSelected);
 
   const selectedModel = DEFAULT_OPENAI_MODEL;
 
@@ -50,8 +53,9 @@ const Chat = (props: any) => {
 
     setIsLoading(true);
 
+    const newConversation = [...conversation, { content: message, role: 'user' }, { content: null, role: 'assistant' }];
     // Add the message to the conversation
-    setConversation([...conversation, { content: message, role: 'user' }, { content: null, role: 'system' }]);
+    setConversation(newConversation);
 
     // Clear the message & remove empty chat
     setMessage('');
@@ -69,26 +73,37 @@ const Chat = (props: any) => {
         }),
       });
 
+      const conversationId = selectedPrompt?.id ?? generateUUID();
+
+      if (conversation.length === 0) {
+        // now store the first conversation in monday storage
+        const prompt: Prompt = {
+          id: conversationId,
+          label: message,
+          date: getCurrentDate(),
+        };
+        await storage().addItemToArray('prompts', prompt);
+        setPrompts([...prompts, prompt]);
+        setSelectedPrompt(prompt);
+      }
+
       if (response.ok) {
         const data = await response.json();
 
-        // Add the message to the conversation
-        setConversation([
+        const updatedConversation = [
           ...conversation,
           { content: message, role: 'user' },
-          { content: data.message, role: 'system' },
-        ]);
+          { content: data.message, role: 'assistant' },
+        ];
+
+        // Update the conversation
+        setConversation(updatedConversation);
+
+        await storage().setItem(`prompts-${conversationId}`, JSON.stringify(updatedConversation));
       } else {
         console.error(response);
         setErrorMessage(response.statusText);
       }
-
-      if (!firstMessageSent) {
-        // now store the first conversation in monday storage
-        await storage().addItemToArray('prompts', message);
-        setPrompts([...prompts, message]);
-      }
-      setFirstMessageSent(true);
 
       setIsLoading(false);
     } catch (error: any) {
@@ -99,11 +114,11 @@ const Chat = (props: any) => {
     }
   };
 
-  const handleKeypress = (e: any) => {
-    // It's triggers by pressing the enter key
+  const handleKeypress = async (e: any) => {
+    // It triggers by pressing the enter key
     if (e.keyCode == 13 && !e.shiftKey) {
-      sendMessage(e);
       e.preventDefault();
+      await sendMessage(e);
     }
   };
 
@@ -127,7 +142,7 @@ const Chat = (props: any) => {
         <div className="flex-1 overflow-hidden">
           <div className="react-scroll-to-bottom--css-ikyem-79elbk h-full dark:bg-gray-800">
             <div className="react-scroll-to-bottom--css-ikyem-1n7m0yu">
-              {!showEmptyChat && conversation.length > 0 ? (
+              {conversation.length > 0 ? (
                 <div className="flex flex-col items-center text-sm bg-gray-800">
                   <div className="flex w-full items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">
                     Model: {selectedModel.name}
@@ -137,40 +152,6 @@ const Chat = (props: any) => {
                   ))}
                   <div className="w-full h-32 md:h-48 flex-shrink-0"></div>
                   <div ref={bottomOfChatRef}></div>
-                </div>
-              ) : null}
-              {showEmptyChat ? (
-                <div className="py-10 relative w-full flex flex-col h-full">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="relative w-full md:w-1/2 lg:w-1/3 xl:w-1/4">
-                      <button
-                        className="relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:border-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:border-white/20 dark:bg-gray-800 sm:text-sm align-center"
-                        id="headlessui-listbox-button-:r0:"
-                        type="button"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        data-headlessui-state=""
-                        aria-labelledby="headlessui-listbox-label-:r1: headlessui-listbox-button-:r0:"
-                      >
-                        <label
-                          className="block text-xs text-gray-700 dark:text-gray-500 text-center"
-                          id="headlessui-listbox-label-:r1:"
-                          data-headlessui-state=""
-                        >
-                          Model
-                        </label>
-                        <span className="inline-flex w-full truncate">
-                          <span className="flex h-6 items-center gap-1 truncate text-white">{selectedModel.name}</span>
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <BsChevronDown className="h-4 w-4 text-gray-400" />
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                  <h1 className="text-2xl sm:text-4xl font-semibold text-center text-gray-200 dark:text-gray-600 flex gap-2 items-center justify-center h-screen">
-                    ChatGPT Clone
-                  </h1>
                 </div>
               ) : null}
               <div className="flex flex-col items-center text-sm dark:bg-gray-800"></div>

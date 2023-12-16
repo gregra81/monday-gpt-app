@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PromptsContext } from '../helpers/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected } from '../state/context';
 
 import Chat from '../components/Chat';
 import Sidebar from '../components/Sidebar';
@@ -10,10 +10,12 @@ import { MONDAY_OAUTH_AUTH_URL } from '../constants/monday';
 import { getMondayToken } from '../helpers/token-storage';
 import { storage } from '../helpers/storage/server';
 import { mondayViewAuthentication } from '../helpers/auth';
+import { Prompt } from '../types/chat';
+import { ConversationProvider } from '../state/ConversationProvider';
 
-export default function Home({ data }) {
+export default function Home(props: { data: Prompt[] }) {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
-  const [prompts, setPrompts] = useState(data ?? []);
+  const [prompts, setPrompts] = useState(props.data ?? []);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
@@ -21,15 +23,17 @@ export default function Home({ data }) {
 
   return (
     <main className="overflow-hidden w-full h-screen relative flex">
-      {isComponentVisible ? <MobileSidebar toggleComponentVisibility={toggleComponentVisibility} /> : null}
-      <PromptsContext.Provider value={{ prompts, setPrompts }}>
-        <div className="dark hidden flex-shrink-0 bg-gray-900 md:flex md:w-[260px] md:flex-col">
-          <div className="flex h-full min-h-0 flex-col ">
-            <Sidebar />
+      <ConversationProvider>
+        <PromptsContext.Provider value={{ setPrompts, prompts }}>
+          {isComponentVisible ? <MobileSidebar toggleComponentVisibility={toggleComponentVisibility} /> : null}
+          <div className="dark hidden flex-shrink-0 bg-gray-900 md:flex md:w-[260px] md:flex-col">
+            <div className="flex h-full min-h-0 flex-col ">
+              <Sidebar />
+            </div>
           </div>
-        </div>
-        <Chat toggleComponentVisibility={toggleComponentVisibility} />
-      </PromptsContext.Provider>
+          <Chat toggleComponentVisibility={toggleComponentVisibility} />
+        </PromptsContext.Provider>
+      </ConversationProvider>
     </main>
   );
 }
@@ -42,11 +46,11 @@ export const getServerSideProps = (async (context) => {
     return mondayAuthorize();
   }
 
-  const data = await storage(mondayToken).getItemAsArray('prompts');
+  const data = await storage(mondayToken).getItemAsArray<Prompt>('prompts');
 
   return { props: { data } };
 }) satisfies GetServerSideProps<{
-  data: any;
+  data: Prompt[];
 }>;
 
 const mondayAuthorize = () => {
