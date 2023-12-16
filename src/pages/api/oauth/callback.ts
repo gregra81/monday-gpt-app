@@ -3,12 +3,13 @@ import axios from 'axios';
 import { MONDAY_OAUTH_TOKEN_URL } from '../../../constants/monday';
 import jwt from 'jsonwebtoken';
 import { getMondayTokenKey, setToken } from '../../../helpers/token-storage';
+import {envGet} from "../../../helpers/env";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const authPayload = {
-    redirect_uri: process.env.MONDAY_APP_AUTH_CALLBACK_URL,
-    client_id: process.env.MONDAY_APP_CLIENT_ID,
-    client_secret: process.env.MONDAY_APP_SECRET,
+    redirect_uri: envGet('MONDAY_APP_AUTH_CALLBACK_URL'),
+    client_id: envGet('MONDAY_APP_CLIENT_ID'),
+    client_secret: envGet('MONDAY_APP_SECRET'),
     code: req.query.code,
   };
 
