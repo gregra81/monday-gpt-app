@@ -16,7 +16,7 @@ export class StorageUtil {
     }
     return resp;
   }
-  async addItemToArray(key: string, value: string) {
+  async addItemToArray(key: string, value: any) {
     const data = await this.getItem(key);
     let valueArray: string[] = [];
     if (data) {
@@ -34,9 +34,9 @@ export class StorageUtil {
     await this.setItem(key, JSON.stringify(valueArray));
   }
 
-  async getItemAsArray(key: string) {
+  async getItemAsArray<T = string>(key: string) {
     const data = await this.getItem(key);
-    let valueArray: string[] = [];
+    let valueArray: T[] = [];
     if (data) {
       try {
         valueArray = JSON.parse(data);

@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { defaultOpenAIConfiguration, openai } from '../../../helpers/openai';
+import { openai } from '../../../helpers/openai';
+import { defaultOpenAICompletionConfiguration } from '../../../constants/openai';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -10,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { message } = req.body;
     const response = await openai.createCompletion({
-      ...defaultOpenAIConfiguration,
+      ...defaultOpenAICompletionConfiguration,
       prompt: `${message}`,
     });
 
