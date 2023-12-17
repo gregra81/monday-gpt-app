@@ -2,9 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { Http401Error, Http500Error } from './errors';
 import type { ParsedUrlQuery } from 'querystring';
+import {envGet} from "./env";
 
 export const mondayWorkflowAuthentication = (req: NextApiRequest, res: NextApiResponse) => {
-  const signingSecret = process.env.MONDAY_SIGNING_SECRET;
+  const signingSecret = envGet('MONDAY_SIGNING_SECRET');
   if (!signingSecret) {
     throw new Http500Error('Unable to authenticate request');
   }
@@ -28,7 +29,7 @@ export const mondayWorkflowAuthentication = (req: NextApiRequest, res: NextApiRe
 };
 
 export const mondayViewAuthentication = (query: ParsedUrlQuery) => {
-  const appSecret = process.env.MONDAY_APP_SECRET;
+  const appSecret = envGet('MONDAY_APP_SECRET');
   if (!appSecret) {
     throw new Http500Error('Unable to authenticate request');
   }

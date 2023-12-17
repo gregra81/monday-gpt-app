@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PromptsContext, ConversationContext, PromptsContextSelected } from '../state/context';
+import { PromptsContext } from '../state/context';
 
 import Chat from '../components/Chat';
 import Sidebar from '../components/Sidebar';
@@ -12,6 +12,7 @@ import { storage } from '../helpers/storage/server';
 import { mondayViewAuthentication } from '../helpers/auth';
 import { Prompt } from '../types/chat';
 import { ConversationProvider } from '../state/ConversationProvider';
+import {envGet} from "../helpers/env";
 
 export default function Home(props: { data: Prompt[] }) {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
@@ -58,10 +59,10 @@ const mondayAuthorize = () => {
     MONDAY_OAUTH_AUTH_URL +
     '?' +
     querystring.stringify({
-      client_id: process.env.MONDAY_APP_CLIENT_ID,
-      redirect_uri: process.env.MONDAY_APP_AUTH_CALLBACK_URL,
+      client_id: envGet('MONDAY_APP_CLIENT_ID'),
+      redirect_uri: envGet('MONDAY_APP_AUTH_CALLBACK_URL'),
       scopes: 'me:read boards:read',
-      app_version_id: 10163336,
+      app_version_id: envGet('DEV_APP_VERSION_ID'),
     });
 
   return {
