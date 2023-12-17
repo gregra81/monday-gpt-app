@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { Http401Error, Http500Error } from './errors';
 import type { ParsedUrlQuery } from 'querystring';
-import {envGet} from "./env";
+import { envGet } from './env';
 
 export const mondayWorkflowAuthentication = (req: NextApiRequest, res: NextApiResponse) => {
   const signingSecret = envGet('MONDAY_SIGNING_SECRET');

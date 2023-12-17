@@ -1,22 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PromptsContext } from '../state/context';
 
 import Chat from '../components/Chat';
 import Sidebar from '../components/Sidebar';
 import MobileSidebar from '../components/MobileSidebar';
-import { GetServerSideProps } from 'next';
-import * as querystring from 'querystring';
-import { MONDAY_OAUTH_AUTH_URL } from '../constants/monday';
-import { getMondayToken } from '../helpers/token-storage';
-import { storage } from '../helpers/storage/server';
 import { mondayViewAuthentication } from '../helpers/auth';
 import { Prompt } from '../types/chat';
 import { ConversationProvider } from '../state/ConversationProvider';
-import {envGet} from "../helpers/env";
+import useAppStorage from '../hooks/useAppStorage';
 
-export default function Home(props: { data: Prompt[] }) {
+export default function Home() {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
-  const [prompts, setPrompts] = useState(props.data ?? []);
+  const [prompts, setPrompts] = useState([] as Prompt[]);
+
+  const { data, error, loading } = useAppStorage<Prompt[]>('prompts');
+  useEffect(() => {
+    if (data) {
+      setPrompts(data);
+    }
+  }, [data]);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
@@ -39,36 +41,8 @@ export default function Home(props: { data: Prompt[] }) {
   );
 }
 
-export const getServerSideProps = (async (context) => {
-  const { accountId, userId } = mondayViewAuthentication(context.query);
-  const mondayToken = await getMondayToken(accountId, userId);
-
-  if (!mondayToken) {
-    return mondayAuthorize();
-  }
-
-  const data = await storage(mondayToken).getItemAsArray<Prompt>('prompts');
-
-  return { props: { data } };
-}) satisfies GetServerSideProps<{
-  data: Prompt[];
-}>;
-
-const mondayAuthorize = () => {
-  const path =
-    MONDAY_OAUTH_AUTH_URL +
-    '?' +
-    querystring.stringify({
-      client_id: envGet('MONDAY_APP_CLIENT_ID'),
-      redirect_uri: envGet('MONDAY_APP_AUTH_CALLBACK_URL'),
-      scopes: 'me:read boards:read',
-      app_version_id: envGet('DEV_APP_VERSION_ID'),
-    });
-
-  return {
-    redirect: {
-      destination: path,
-      permanent: false,
-    },
-  };
+export const getServerSideProps = async (context) => {
+  // validate that view is loaded in monday
+  mondayViewAuthentication(context.query);
+  return { props: {} };
 };

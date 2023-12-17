@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { storage } from '../helpers/storage/client';
-function useAppStorage(key: string) {
-  const [data, setData] = useState(null);
+function useAppStorage<T>(key: string) {
+  const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -10,11 +10,12 @@ function useAppStorage(key: string) {
       setLoading(true);
       const resp = await storage().getItem(key);
       try {
-        if (!resp || !resp?.value) {
+        if (!resp) {
           setData(null);
           return;
         }
-        setData(JSON.parse(resp?.value));
+        const data = JSON.parse(resp) as T;
+        setData(data);
       } catch (err: any) {
         setError(err);
       } finally {
