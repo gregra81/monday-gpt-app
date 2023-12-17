@@ -7,18 +7,18 @@ import MobileSidebar from '../components/MobileSidebar';
 import { mondayViewAuthentication } from '../helpers/auth';
 import { Prompt } from '../types/chat';
 import { ConversationProvider } from '../state/ConversationProvider';
-import useAppStorage from "../hooks/useAppStorage";
+import useAppStorage from '../hooks/useAppStorage';
 
 export default function Home() {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const [prompts, setPrompts] = useState([] as Prompt[]);
 
   const { data, error, loading } = useAppStorage<Prompt[]>('prompts');
-    useEffect(() => {
-        if (data) {
-        setPrompts(data);
-        }
-    }, [data]);
+  useEffect(() => {
+    if (data) {
+      setPrompts(data);
+    }
+  }, [data]);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
@@ -41,9 +41,8 @@ export default function Home() {
   );
 }
 
-export const getServerSideProps = (async (context) => {
+export const getServerSideProps = async (context) => {
   // validate that view is loaded in monday
   mondayViewAuthentication(context.query);
-  return { props: { } };
-});
-
+  return { props: {} };
+};
