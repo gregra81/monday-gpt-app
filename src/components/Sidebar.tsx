@@ -1,20 +1,21 @@
 import React, { useContext } from 'react';
 import { AiOutlineMessage, AiOutlinePlus } from 'react-icons/ai';
 import { FiMessageSquare } from 'react-icons/fi';
-import { PromptsContext, ConversationContext, PromptsContextSelected } from '../state/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected, UserContext } from '../state/context';
 import { shortenString } from '../helpers/string';
 import { storage } from '../helpers/storage/client';
 import { Conversation, Prompt } from '../types/chat';
 
 const Sidebar = () => {
+  const { user } = useContext(UserContext);
   const { prompts, setPrompts } = useContext(PromptsContext);
   const { setConversation } = useContext(ConversationContext);
   const { selectedPrompt, setSelectedPrompt } = useContext(PromptsContextSelected);
   const clearConversations = async () => {
-    const deletePromptsPromises = prompts.map((prompt: Prompt) => storage().removeItem(`prompts-${prompt.id}`));
+    const deletePromptsPromises = prompts.map((prompt: Prompt) => storage().removeItem(`prompts_${user}_${prompt.id}`));
     await Promise.all(deletePromptsPromises);
 
-    await storage().removeItem('prompts');
+    await storage().removeItem(`prompts_${user}`);
     setPrompts([]);
   };
 
@@ -24,7 +25,7 @@ const Sidebar = () => {
   };
 
   const loadConversation = async (prompt: Prompt) => {
-    const conversation = await storage().getItemAsArray<Conversation>(`prompts-${prompt.id}`);
+    const conversation = await storage().getItemAsArray<Conversation>(`prompts_${user}_${prompt.id}`);
     setConversation(conversation);
     setSelectedPrompt(prompt);
   };

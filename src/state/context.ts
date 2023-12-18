@@ -9,3 +9,8 @@ export const ConversationContext = createContext({
   conversation: [] as Conversation[],
   setConversation: (messages: Conversation[]) => {},
 });
+
+export const UserContext = createContext({
+  user: null as number | null,
+  setUser: (user: number) => {},
+});

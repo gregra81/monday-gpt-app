@@ -4,7 +4,7 @@ import { BsPlusLg } from 'react-icons/bs';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import Message from './Message';
 import useAutoResizeTextArea from '../hooks/useAutoResizeTextArea';
-import { PromptsContext, ConversationContext, PromptsContextSelected } from '../state/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected, UserContext } from '../state/context';
 import { storage } from '../helpers/storage/client';
 import { DEFAULT_OPENAI_MODEL } from '../constants/openai';
 import { getCurrentDate } from '../helpers/date';
@@ -21,6 +21,7 @@ const Chat = (props: any) => {
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
+  const { user } = useContext(UserContext);
   const { prompts, setPrompts } = useContext(PromptsContext);
   const { conversation, setConversation } = useContext(ConversationContext);
   const { selectedPrompt, setSelectedPrompt } = useContext(PromptsContextSelected);
@@ -82,7 +83,7 @@ const Chat = (props: any) => {
           label: message,
           date: getCurrentDate(),
         };
-        await storage().addItemToArray('prompts', prompt);
+        await storage().addItemToArray(`prompts_${user}`, prompt);
         setPrompts([...prompts, prompt]);
         setSelectedPrompt(prompt);
       }
@@ -99,7 +100,7 @@ const Chat = (props: any) => {
         // Update the conversation
         setConversation(updatedConversation);
 
-        await storage().setItem(`prompts-${conversationId}`, JSON.stringify(updatedConversation));
+        await storage().setItem(`prompts_${user}_${conversationId}`, JSON.stringify(updatedConversation));
       } else {
         console.error(response);
         setErrorMessage(response.statusText);
