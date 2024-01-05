@@ -1,10 +1,23 @@
 import { SiOpenai } from 'react-icons/si';
 import { HiUser } from 'react-icons/hi';
 import { TbCursorText } from 'react-icons/tb';
+import { useEffect, useState } from 'react';
+import initMondayClient from 'monday-sdk-js';
 
 const Message = (props: any) => {
   const { message } = props;
   const { role, content: text } = message;
+  const [user, setUser] = useState<{ photo_tiny: string } | null>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const currentUser = await initMondayClient().api(`query { me { photo_tiny } }`);
+
+      setUser(currentUser.data.me);
+    }
+
+    getUser().then();
+  }, []);
 
   const isUser = role === 'user';
 
@@ -18,7 +31,15 @@ const Message = (props: any) => {
         <div className="flex flex-row gap-4 md:gap-6 md:max-w-2xl lg:max-w-xl xl:max-w-3xl p-4 md:py-6 lg:px-0 m-auto w-full">
           <div className="w-8 flex flex-col relative items-end">
             <div className="relative h-7 w-7 p-1 rounded-sm text-white flex items-center justify-center bg-black/75 text-opacity-100r">
-              {isUser ? <HiUser className="h-4 w-4 text-white" /> : <SiOpenai className="h-4 w-4 text-white" />}
+              {isUser ? (
+                user ? (
+                  <img src={user.photo_tiny} />
+                ) : (
+                  <HiUser className="h-4 w-4 text-white" />
+                )
+              ) : (
+                <SiOpenai className="h-4 w-4 text-white" />
+              )}
             </div>
             <div className="text-xs flex items-center justify-center gap-1 absolute left-0 top-2 -ml-4 -translate-x-full group-hover:visible !invisible">
               <button disabled className="text-gray-300 dark:text-gray-400"></button>

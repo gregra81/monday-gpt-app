@@ -11,11 +11,11 @@ const Prompt = () => {
 
   const monday = mondaySdk();
 
-  const handleEnter = (e: React.KeyboardEvent<HTMLTextAreaElement> & React.FormEvent<HTMLFormElement>) => {
+  const handleEnter = async (e: React.KeyboardEvent<HTMLTextAreaElement> & React.FormEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && !isLoading) {
       e.preventDefault();
       setIsLoading(true);
-      handleSubmit(e);
+      await handleSubmit(e);
     }
   };
 
