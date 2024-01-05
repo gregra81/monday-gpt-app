@@ -2,7 +2,6 @@
 import { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import mondaySdk from 'monday-sdk-js';
-import css from './prompt.module.css';
 
 const Prompt = () => {
   const messageInput = useRef<HTMLTextAreaElement | null>(null);
@@ -11,11 +10,11 @@ const Prompt = () => {
 
   const monday = mondaySdk();
 
-  const handleEnter = (e: React.KeyboardEvent<HTMLTextAreaElement> & React.FormEvent<HTMLFormElement>) => {
+  const handleEnter = async (e: React.KeyboardEvent<HTMLTextAreaElement> & React.FormEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && !isLoading) {
       e.preventDefault();
       setIsLoading(true);
-      handleSubmit(e);
+      await handleSubmit(e);
     }
   };
 
@@ -63,15 +62,18 @@ const Prompt = () => {
   }, [monday]);
 
   return (
-    <div>
+    <div className="h-48">
       {isLoading ? (
-        <div className={css.loaderWrapper}>
-          <span className={css.loader}></span>
+        <div className="h-full grid-cols-3 gap-4 content-center flex justify-center items-center">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          ></div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="h-full">
           <textarea
-            className={css.textarea}
+            className="rounded-lg resize-none w-full h-full block p-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             name="Message"
             placeholder="Type your prompt here (and hit enter)"
             ref={messageInput}
