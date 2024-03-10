@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import mondaySdk from 'monday-sdk-js';
+import { storage } from '../helpers/storage/client';
 import Chat from '../components/Chat';
 import Sidebar from '../components/Sidebar';
 import MobileSidebar from '../components/MobileSidebar';
 import { mondayViewAuthentication } from '../helpers/auth';
 import { Prompt } from '../types/chat';
 import { ConversationProvider } from '../state/ConversationProvider';
-import useAppStorage from '../hooks/useAppStorage';
 import { MondayContext } from '../state/context';
 import type { BaseContext } from 'monday-sdk-js/types/client-context.type';
 
@@ -15,13 +15,6 @@ export default function Home() {
   const [isComponentVisible, setIsComponentVisible] = useState(false);
   const [prompts, setPrompts] = useState([] as Prompt[]);
   const [context, setMondayContext] = useState({} as BaseContext);
-
-  const { data, error, loading } = useAppStorage<Prompt[]>('prompts');
-  useEffect(() => {
-    if (data) {
-      setPrompts(data);
-    }
-  }, [data]);
 
   useEffect(() => {
     monday.execute('valueCreatedForUser');
@@ -32,6 +25,18 @@ export default function Home() {
     }
     setMondayCtx();
   }, []);
+
+  useEffect(() => {
+    async function getPromptsFromStorage() {
+      if (!context?.user?.id) return;
+      const prompts = await storage().getItem(`prompts_${context?.user?.id}`);
+      if (prompts) {
+        setPrompts(JSON.parse(prompts));
+      }
+    }
+
+    getPromptsFromStorage();
+  }, [context?.user?.id]);
 
   const toggleComponentVisibility = () => {
     setIsComponentVisible(!isComponentVisible);
