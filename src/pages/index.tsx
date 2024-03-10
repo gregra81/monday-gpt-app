@@ -26,7 +26,6 @@ export default function Home() {
     setMondayCtx();
   }, []);
 
-
   useEffect(() => {
     async function getPromptsFromStorage() {
       if (!context?.user?.id) return;

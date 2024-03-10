@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AiOutlineMessage, AiOutlinePlus } from 'react-icons/ai';
 import { FiMessageSquare } from 'react-icons/fi';
-import {PromptsContext, ConversationContext, PromptsContextSelected, MondayContext} from '../state/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected, MondayContext } from '../state/context';
 import { shortenString } from '../helpers/string';
 import { storage } from '../helpers/storage/client';
 import { Conversation, Prompt } from '../types/chat';

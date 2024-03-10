@@ -4,7 +4,7 @@ import { BsPlusLg } from 'react-icons/bs';
 import { RxHamburgerMenu } from 'react-icons/rx';
 import Message from './Message';
 import useAutoResizeTextArea from '../hooks/useAutoResizeTextArea';
-import {PromptsContext, ConversationContext, PromptsContextSelected, MondayContext} from '../state/context';
+import { PromptsContext, ConversationContext, PromptsContextSelected, MondayContext } from '../state/context';
 import { storage } from '../helpers/storage/client';
 import { DEFAULT_OPENAI_MODEL } from '../constants/openai';
 import { getCurrentDate } from '../helpers/date';
